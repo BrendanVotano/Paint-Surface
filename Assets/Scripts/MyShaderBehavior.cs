@@ -65,4 +65,30 @@ public class MyShaderBehavior : MonoBehaviour
             m_texture.Apply();
         }
     }
+
+    public void PaintOn(Vector3 textureCoord, Texture2D splashTexture)
+    {
+        if (isEnabled)
+        {
+            int x = (int)(textureCoord.x * textureWidth) - (splashTexture.width / 2);
+            int y = (int)(textureCoord.y * textureHeight) - (splashTexture.height / 2);
+            for (int i = 0; i < splashTexture.width; ++i)
+                for (int j = 0; j < splashTexture.height; ++j)
+                {
+                    int newX = x + i;
+                    int newY = y + j;
+                    Color existingColor = m_texture.GetPixel(newX, newY);
+                    Color targetColor = splashTexture.GetPixel(i, j);
+                    float alpha = targetColor.a;
+                    if (alpha > 0)
+                    {
+                        Color result = Color.Lerp(existingColor, targetColor, alpha);   // resulting color is an addition of splash texture to the texture based on alpha
+                        result.a = existingColor.a + alpha;                             // but resulting alpha is a sum of alphas (adding transparent color should not make base color more transparent)
+                        m_texture.SetPixel(newX, newY, result);
+                    }
+                }
+
+            m_texture.Apply();
+        }
+    }
 }
